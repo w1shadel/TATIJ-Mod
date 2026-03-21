@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.maxwell.translate_all_text_into_japanese.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins":[
+    "MixinLanguage",
+    "MixinFont",
+    "MixinMultiPackResourceManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
