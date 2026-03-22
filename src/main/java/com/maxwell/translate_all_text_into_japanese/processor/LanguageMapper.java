@@ -38,7 +38,11 @@ public class LanguageMapper {
      */
     public static void seedFromAllGuides() {
         var manager = Minecraft.getInstance().getResourceManager();
-        String[] guideDirs = {"guide", "patchouli_books", "book", "guideme", "info", "ae2guide"};
+        String[] guideDirs = {
+            "guide", "guides", "patchouli_books", "book", "books", "guideme", 
+            "info", "ae2guide", "lexicon", "manual", "tome", "journal", 
+            "encyclopedia", "quests", "ftbquests"
+        };
         
         AutoTransLog.LOGGER.info("ガイドブックの事前スキャンを開始します...");
         int count = 0;
