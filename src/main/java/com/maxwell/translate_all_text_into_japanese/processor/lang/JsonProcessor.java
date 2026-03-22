@@ -12,7 +12,8 @@ public class JsonProcessor {
             "type", "category", "icon", "spell", "advancement", "id", "key", "modName", "modVersion", 
             "uuid", "entity", "name", "recipe", "atlas", "parent", "requirement", "item", "block", 
             "texture", "resource", "url", "link", "site", "goal", "entry", "flag", "page",
-            "processor", "group", "template", "component", "components"
+            "processor", "group", "template", "component", "components", "operation", "attribute",
+            "attribute_name", "mode", "tier", "rarity", "function", "method", "class", "target", "path"
     );
 
     /**

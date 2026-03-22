@@ -10,6 +10,11 @@ import java.util.WeakHashMap;
 
 public class TranslationService {
     private static final Map<Resource, ResourceLocation> RESOURCE_LOCATIONS = Collections.synchronizedMap(new WeakHashMap<>());
+    private static volatile boolean initialized = false;
+
+    public static void init() {
+        initialized = true;
+    }
 
     public static void registerResource(Resource resource, ResourceLocation location) {
         if (resource != null && location != null) {
@@ -18,6 +23,7 @@ public class TranslationService {
     }
 
     public static ResourceLocation getResourceLocation(Resource resource) {
+        if (!initialized) return null;
         return RESOURCE_LOCATIONS.get(resource);
     }
 
@@ -37,23 +43,31 @@ public class TranslationService {
             p.contains("advancements/") || 
             p.contains("loot_tables/") || 
             p.contains("tags/") ||
-            p.contains("lang/") ||    // 言語ファイル(既に別で処理済み)
-            p.contains("font/") ||    // フォント
-            p.contains("shaders/") || // シェーダー
-            p.contains("particles/") || // パーティクル
-            p.contains("sounds/") ||    // 音声
-            p.contains("/item/") ||   // アイテム定義json
-            p.contains("/block/")) {  // ブロック定義json
+            p.contains("lang/") ||
+            p.contains("font/") ||
+            p.contains("shaders/") ||
+            p.contains("particles/") ||
+            p.contains("sounds/") ||
+            p.contains("/item/") ||
+            p.contains("/block/") ||
+            p.contains("worldgen/") ||   // ワールド生成データ
+            p.contains("dimension/") ||  // 次元データ
+            p.contains("upgrade_orb_type/") || // Irons Spellbooksの技術データ
+            p.contains("irons_spellbooks")) { // Irons Spellbooks全体を除外（技術ファイルが多いため）
             return false;
         }
 
-        // 包含リスト
-        return p.contains("guide") || p.contains("patchouli") || p.contains("book") || 
-               p.contains("malum") || p.contains("info") || p.contains("guideme");
+        // 包含リスト - より慎重なマッチング
+        return p.contains("guide") || 
+               p.contains("patchouli") || 
+               (p.contains("book") && !p.contains("irons_spellbooks")) || // irons_spellbooks内のbookは除外済み
+               p.contains("malum") || 
+               p.contains("info") || 
+               p.contains("guideme");
     }
 
     public static String getTranslation(String text) {
-        if (text == null || text.isEmpty()) return text;
+        if (!initialized || text == null || text.isEmpty()) return text;
         if (text.matches(".*[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FAF].*")) return text;
 
         if (TranslationCache.contains(text)) {
@@ -66,7 +80,7 @@ public class TranslationService {
     }
 
     public static String getDocumentTranslation(String location, String content) {
-        if (content == null || content.isEmpty()) return content;
+        if (!initialized || content == null || content.isEmpty()) return content;
         
         // ファイル単位でのキャッシュ読込・保存を廃止。
         // パラグラフ（行）単位でのキャッシュ引き当てに任せることで、一部でも翻訳が終わっていれば表示に即時反映させる。
@@ -74,7 +88,7 @@ public class TranslationService {
     }
 
     public static String getJsonTranslation(String location, String jsonContent) {
-        if (jsonContent == null || jsonContent.isEmpty()) return jsonContent;
+        if (!initialized || jsonContent == null || jsonContent.isEmpty()) return jsonContent;
         
         // 同様に行・キー単位のプロセスへと委譲する。
         return JsonProcessor.process(jsonContent);

@@ -145,6 +145,10 @@ dependencies {
     implementation "curse.maven:better-combat-by-daedelus-639842:7348161"
     implementation "curse.maven:cloth-config-348521:5729127"
     implementation "curse.maven:ex-pattern-provider-892005:7727948"
+    implementation "curse.maven:ftb-quests-forge-289412:7775452"
+    implementation "curse.maven:architectury-api-419699:5786327"
+    implementation "curse.maven:ftb-library-forge-404465:7746959"
+    implementation "curse.maven:ftb-teams-forge-404468:7369021"
     implementation "curse.maven:glodium-957920:5821676"
     implementation "curse.maven:playeranimator-658587:7389814"
 }

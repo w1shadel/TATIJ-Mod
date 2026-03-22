@@ -10,15 +10,19 @@ public class TranslationDispatcher {
     private static final BlockingQueue<String> URGENT = new LinkedBlockingQueue<>();
     private static final BlockingQueue<String> BACKGROUND = new LinkedBlockingQueue<>();
     private static final java.util.concurrent.atomic.AtomicInteger ACTIVE_TASKS = new java.util.concurrent.atomic.AtomicInteger(0);
-    // Google翻訳APIへのアクセス過多による429（一時遮断）を防ぐため、スレッド数を2に制限
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(2);
+    // POST拒否対策としてGETに戻しつつ、スレッドを6に増やして並列速度を限界まで高める
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(6);
 
 
 
-    static {
-        for (int i = 0; i < 2; i++) {
+    private static boolean started = false;
+    public static synchronized void init() {
+        if (started) return;
+        started = true;
+        for (int i = 0; i < 6; i++) {
             EXECUTOR.submit(TranslationDispatcher::processLoop);
         }
+        AutoTransLog.LOGGER.info("TranslationDispatcher initialized with 6 threads.");
     }
 
     public static void submit(String text, boolean urgent) {
@@ -43,7 +47,7 @@ public class TranslationDispatcher {
                 java.util.List<String> batch = new java.util.ArrayList<>();
                 int currentLength = 0;
                 
-                while (batch.size() < 20 && currentLength < 1500) {
+                while (batch.size() < 60 && currentLength < 1200) {
                     String p = URGENT.poll();
                     if (p == null) {
                         if (batch.isEmpty()) {
@@ -100,7 +104,7 @@ public class TranslationDispatcher {
                             TranslationCache.save();
 
                             int remaining = URGENT.size() + BACKGROUND.size() + ACTIVE_TASKS.get();
-                            if (remaining % 20 < batch.size() && remaining > 0) {
+                            if (remaining % 60 < batch.size() && remaining > 0) {
                                 AutoTransLog.LOGGER.info("バッチ翻訳完了（{}件）。残りキュー: {} 件", batch.size(), remaining);
                             }
                         } else {
