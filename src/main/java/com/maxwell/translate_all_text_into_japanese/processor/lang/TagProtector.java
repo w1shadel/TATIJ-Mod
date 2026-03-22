@@ -1,18 +1,27 @@
 package com.maxwell.translate_all_text_into_japanese.processor.lang;
 
-import com.maxwell.translate_all_text_into_japanese.util.AutoTransLog;
-import com.maxwell.translate_all_text_into_japanese.processor.GoogleTranslator;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TagProtector {
-    private static final Pattern PROTECT_PATTERN = Pattern.compile("<[^>]+?/>|<[^>]+>");
+    private static final Pattern PROTECT_PATTERN = Pattern.compile("(?s)<[^>]+?>|§[0-9a-fklmnor]");
 
-    public static String translateWithProtection(String text) {
-        if (text.trim().isEmpty()) return text;
+    public static class ProtectionResult {
+        public final String protectedText;
+        public final List<String> tags;
+
+        public ProtectionResult(String protectedText, List<String> tags) {
+            this.protectedText = protectedText;
+            this.tags = tags;
+        }
+    }
+
+    public static ProtectionResult protect(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return new ProtectionResult(text, new ArrayList<>());
+        }
 
         List<String> tags = new ArrayList<>();
         Matcher matcher = PROTECT_PATTERN.matcher(text);
@@ -25,20 +34,18 @@ public class TagProtector {
         }
         matcher.appendTail(sb);
 
-        String translated = GoogleTranslator.fetchTranslation(sb.toString());
-
-        return restoreTags(translated, tags);
+        return new ProtectionResult(sb.toString(), tags);
     }
 
-    private static String restoreTags(String translated, List<String> tags) {
+    public static String restore(String translated, List<String> tags) {
+        if (translated == null || tags == null || tags.isEmpty()) {
+            return translated;
+        }
+
         for (int i = 0; i < tags.size(); i++) {
             String regex = "\\[\\s*##\\s*" + i + "\\s*##\\s*\\]";
             translated = translated.replaceAll(regex, Matcher.quoteReplacement(tags.get(i)));
         }
-        if (translated.contains("[##")) {
-            AutoTransLog.LOGGER.error("Warning: Restoration failed. Some tags may not have been restored. {}", translated);
-        }
-
         return translated;
     }
 }

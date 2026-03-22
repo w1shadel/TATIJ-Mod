@@ -5,7 +5,9 @@
   "mixins":[
     "MixinLanguage",
     "MixinFont",
-    "MixinMultiPackResourceManager"
+    "MixinMultiPackResourceManager",
+    "MixinResource",
+    "MixinFallbackResourceManager"
   ],
   "injectors": {
     "defaultRequire": 1

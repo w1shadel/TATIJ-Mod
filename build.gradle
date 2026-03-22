@@ -135,6 +135,7 @@ dependencies {
    implementation "curse.maven:lodestone-616457:7264731"
     implementation "curse.maven:applied-energistics-2-223794:7027323"
     implementation "curse.maven:guideme-1173950:7127444"
+    implementation "curse.maven:cyberware-reforged-1401640:7784252"
     implementation "curse.maven:jade-324717:6853386"
     implementation "curse.maven:patchouli-306770:7730942"
     implementation "curse.maven:psi-241665:7664607"
@@ -143,6 +144,8 @@ dependencies {
     implementation "curse.maven:curios-309927:6529130"
     implementation "curse.maven:better-combat-by-daedelus-639842:7348161"
     implementation "curse.maven:cloth-config-348521:5729127"
+    implementation "curse.maven:ex-pattern-provider-892005:7727948"
+    implementation "curse.maven:glodium-957920:5821676"
     implementation "curse.maven:playeranimator-658587:7389814"
 }
 

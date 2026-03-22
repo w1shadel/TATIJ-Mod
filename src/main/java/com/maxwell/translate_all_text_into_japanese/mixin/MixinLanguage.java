@@ -24,6 +24,9 @@ public class MixinLanguage {
 
             String translated = TranslationService.getTranslation(originalResult);
             if (!translated.equals(originalResult)) {
+                if (key.startsWith("malum.gui.book")) {
+                    translated = TranslationService.applyJapaneseWordWrap(translated);
+                }
                 cir.setReturnValue(translated);
             }
         } finally {

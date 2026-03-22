@@ -2,7 +2,7 @@ package com.maxwell.translate_all_text_into_japanese.mixin;
 
 import com.maxwell.translate_all_text_into_japanese.processor.lang.TranslationService;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,11 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-@Mixin(MultiPackResourceManager.class)
-public class MixinMultiPackResourceManager {
-    /**
-     * getResource 時に Resource インスタンスと場所を紐付け登録する
-     */
+@Mixin(FallbackResourceManager.class)
+public class MixinFallbackResourceManager {
     @Inject(method = "getResource", at = @At("RETURN"))
     private void onGetResource(ResourceLocation location, CallbackInfoReturnable<Optional<Resource>> cir) {
         Optional<Resource> res = cir.getReturnValue();
@@ -26,9 +23,6 @@ public class MixinMultiPackResourceManager {
         }
     }
 
-    /**
-     * listResources 時に返されるすべての Resource インスタンスと場所を紐付け登録する
-     */
     @Inject(method = "listResources", at = @At("RETURN"))
     private void onListResources(String path, Predicate<ResourceLocation> filter, CallbackInfoReturnable<Map<ResourceLocation, Resource>> cir) {
         Map<ResourceLocation, Resource> map = cir.getReturnValue();

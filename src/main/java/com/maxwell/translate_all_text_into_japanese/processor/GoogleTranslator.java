@@ -18,7 +18,13 @@ public class GoogleTranslator {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
+    /**
+     * Google翻訳APIを使用してテキストを翻訳します。
+     * ネットワークエラーやレート制限(429)が発生した場合は null を返し、呼び出し側にリトライを促します。
+     */
     public static String fetchTranslation(String text) {
+        if (text == null || text.isEmpty()) return text;
+        
         try {
             String url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ja&dt=t&q="
                     + URLEncoder.encode(text, StandardCharsets.UTF_8);
@@ -30,11 +36,13 @@ public class GoogleTranslator {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
             if (response.statusCode() == 429) {
-                AutoTransLog.LOGGER.warn("API Rate Limit exceeded (429)! Waiting...");
+                AutoTransLog.LOGGER.warn("API Rate Limit exceeded (429)! Waiting... [Text: {}]", truncate(text, 20));
                 Thread.sleep(10000);
-                return null;
+                return null; // リトライ対象
             }
+            
             if (response.statusCode() == 200) {
                 JsonArray jsonResponse = JsonParser.parseString(response.body()).getAsJsonArray();
                 StringBuilder result = new StringBuilder();
@@ -49,11 +57,21 @@ public class GoogleTranslator {
                 }
                 return result.toString();
             } else {
-                AutoTransLog.LOGGER.error("Google API Error: Status {}", response.statusCode());
+                AutoTransLog.LOGGER.error("Google API Error: Status {} [Text: {}]", response.statusCode(), truncate(text, 20));
+                // 400系などの致命的なエラーの場合はリトライせず原文を返す
+                if (response.statusCode() >= 400 && response.statusCode() < 500) {
+                    return text;
+                }
+                return null; // 500系などはリトライ対象
             }
         } catch (Exception e) {
-            AutoTransLog.LOGGER.error("API communication error {}", e.getMessage());
+            AutoTransLog.LOGGER.error("API communication error: {} [Text: {}]", e.getMessage(), truncate(text, 20));
+            return null; // ネットワークエラー等はリトライ対象
         }
-        return text;
+    }
+
+    private static String truncate(String text, int max) {
+        if (text.length() <= max) return text;
+        return text.substring(0, max) + "...";
     }
 }
